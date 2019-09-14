@@ -1,28 +1,23 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"os"
 
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-
-	if port == "" {
-		log.Fatal("$PORT must be set")
-	}
-
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.LoadHTMLGlob("templates/*.tmpl.html")
+	port := "8080"
+	router := gin.Default()
 	router.Static("/static", "static")
 
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl.html", nil)
+	router.Use(static.Serve("/", static.LocalFile("./static", true)))
+
+	// Handle 404s
+	router.NoRoute(func(c *gin.Context) {
+		c.String(http.StatusNotFound, "Sorry, this page is no where to be found. :(")
 	})
 
 	router.Run(":" + port)
