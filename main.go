@@ -10,11 +10,10 @@ import (
 )
 
 func main() {
-	port := os.Getenv("PORT")
-
-	if port == "" {
-		log.Fatal("$PORT must be set")
+	if len(os.Args) != 2 {
+		log.Fatal("you mus supply a port number")
 	}
+	port := os.Args[1]
 
 	router := gin.New()
 	router.Use(gin.Logger())
