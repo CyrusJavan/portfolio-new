@@ -2,3 +2,4 @@
 *.code-workspace
 .docker_build/
 bin/
+.DS_Store
