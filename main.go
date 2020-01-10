@@ -13,7 +13,7 @@ import (
 func main() {
 	port := ""
 	if os.Getenv("PORT") == "" {
-		port = "8080"
+		port = "7070"
 	} else {
 		port = os.Getenv("PORT")
 	}

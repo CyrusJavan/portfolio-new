@@ -3,3 +3,4 @@
 .docker_build/
 bin/
 .DS_Store
+node_modules

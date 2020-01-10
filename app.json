@@ -1,12 +1,10 @@
 {
-  "name": "Start on Heroku: Go",
-  "description": "Go Getting Started Example App",
+  "name": "Cyrus Javan Portfolio",
+  "description": "Cyrus Javan's home site",
   "keywords": [
-    "getting-started",
-    "go",
-    "sample",
-    "example"
+    "cyrus javan",
+    "go"
   ],
-  "website": "http://github.com/heroku/go-getting-started",
-  "repository": "http://github.com/heroku/go-getting-started"
+  "website": "http://github.com/CyrusJavan/portfolio-new",
+  "repository": "http://github.com/CyrusJavan/portfolio-new"
 }
