@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gin-gonic/contrib/static"
+	"html/template"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
 )
@@ -23,10 +24,14 @@ func main() {
 	}
 	router := gin.Default()
 	router.Static("/static", "static")
+	tmpl := template.Must(template.ParseGlob("src/tpl/*.tpl"))
 
-	router.Use(static.Serve("/", static.LocalFile("./static", true)))
+	router.GET("/", func(c *gin.Context) {
+		tmpl.ExecuteTemplate(c.Writer, "index.tpl", nil)
+	})
 
-	// Handle 404s
+	//router.Use(static.Serve("/", static.LocalFile("./static", true)))
+
 	router.NoRoute(func(c *gin.Context) {
 		c.String(http.StatusNotFound, "Sorry, this page is no where to be found. :(")
 	})

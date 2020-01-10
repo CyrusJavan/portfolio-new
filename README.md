@@ -1,4 +1,6 @@
 
-# Development
+# A Simple Portfolio Site
 
-- To re bundle app.jsx run `./bundle.sh`
+- webserver: Gin
+- templating: html/template
+- styling: bootstrap 4

@@ -1,0 +1,43 @@
+body {
+	/*background: linear-gradient(2deg, #002410 0%, #00684B 51%, #00A09B 85%);*/
+	background-color:#007E92;
+}
+h1, h2, h3, h4 {
+	color: #DEDEDE;
+	font-family: 'Raleway', sans-serif;
+}
+
+h1 {
+	font-size: 30px;
+}
+h2 {
+	font-size: 24px;
+}
+h3 {
+	font-size: 18px;
+}
+@media only screen and (max-width: 768px) {
+	.container .row .headshot {
+		width: 50%;
+		border-radius: 20%;
+	}
+}
+@media only screen and (min-width: 769px) {
+	.container .row .headshot {
+		width: 20%;
+		border-radius: 20%;
+	}
+}
+
+a {
+	color: #DEDEDE;
+}
+
+a:hover {
+	color: #A6CDDB;
+	text-decoration: none;
+}
+
+.social-icon i {
+	font-size: 28px;
+}
