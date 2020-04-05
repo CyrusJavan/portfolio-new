@@ -1,2 +1,2 @@
-release: go run migrations/migrate.go
+release: bin/migrations
 web: bin/go-getting-started
