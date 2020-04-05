@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/heroku/go-getting-started/src/blog"
+	"github.com/CyrusJavan/blog/src/blog"
 	_ "github.com/heroku/x/hmetrics/onload"
 )
 

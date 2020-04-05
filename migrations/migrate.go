@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/heroku/go-getting-started/src/db"
+	"github.com/CyrusJavan/blog/src/db"
 	"github.com/joho/godotenv"
 
 	"github.com/golang-migrate/migrate/v4"

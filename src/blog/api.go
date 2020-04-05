@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/CyrusJavan/blog/src/db"
 	"github.com/gin-gonic/gin"
-	"github.com/heroku/go-getting-started/src/db"
 )
 
 type trackResponse struct {
