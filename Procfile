@@ -1,2 +1,2 @@
 release: bin/migrations
-web: bin/blog
+web: bin/portfolio-new

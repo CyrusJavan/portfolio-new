@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/CyrusJavan/blog/src/db"
+	"github.com/CyrusJavan/portfolio-new/src/db"
 	"github.com/joho/godotenv"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -16,16 +16,20 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Print("No .env file found")
 	}
+
 	db := db.GetInstance()
 	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://migrations",
 		"postgres", driver)
 	if err != nil {
 		log.Fatal(err)
 	}
-	m.Steps(1)
+
+	// Each deploy we run all up migrations
+	m.Up()
 }

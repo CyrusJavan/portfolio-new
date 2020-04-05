@@ -40,7 +40,7 @@ github.com/leodido/go-urn
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
-# github.com/mattn/go-isatty v0.0.9
+# github.com/mattn/go-isatty v0.0.11
 github.com/mattn/go-isatty
 # github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421
 github.com/modern-go/concurrent

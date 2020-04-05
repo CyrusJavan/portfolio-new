@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/CyrusJavan/blog/src/blog"
+	"github.com/CyrusJavan/portfolio-new/src/blog"
 	_ "github.com/heroku/x/hmetrics/onload"
 )
 

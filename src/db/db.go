@@ -13,6 +13,7 @@ var conn *sqlx.DB
 
 // GetInstance of the db
 func GetInstance() *sqlx.DB {
+	// Use an existing connection if you can
 	if conn != nil {
 		return conn
 	}

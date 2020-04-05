@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/CyrusJavan/blog/src/db"
+	"github.com/CyrusJavan/portfolio-new/src/db"
 	"github.com/gin-gonic/gin"
 )
 
