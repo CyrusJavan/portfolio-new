@@ -39,3 +39,8 @@ a:hover {
 .social-icon {
 	font-size: 28px;
 }
+
+.author-image {
+	height: 3rem;
+	width: 3rem;
+}

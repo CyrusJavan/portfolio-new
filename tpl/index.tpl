@@ -36,11 +36,13 @@
     {{ if eq .Page "Home"}}
       {{ template "Home" . }}
     {{ else if eq .Page "Blog" }}
-      {{ template "Blog" . }}
+      {{ template "Blog" .Articles }}
     {{ else if eq .Page "Talks" }}
       {{ template "Talks" . }}
     {{ else if eq .Page "About" }}
       {{ template "About" . }}
+    {{ else if eq .Page "BlogArticle"}}
+      {{ template "BlogArticle" .Article }}
     {{end}}
   </div>
   {{ template "Footer" . }}
