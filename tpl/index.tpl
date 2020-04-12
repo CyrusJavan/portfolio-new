@@ -15,7 +15,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="Cyrus Javan is a Software Engineer, Jiu Jitsu Practioner and Aquarium Enthusiast currently residing in Silicon Valley.">
-  <link rel="canonical" href="https://cyrusjavan.com/" />
+  {{ if eq .Page "Editor" }}
+  <script src="https://cdn.tiny.cloud/1/zx5yx2fkutbfv4w37qn78iwo1q0zgwod5xj2gkwgbsjz8837/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+  <script>
+    tinymce.init({
+      selector: '#mytextarea',
+      plugins: 'code',
+      toolbar: 'code',
+      menubar: false
+    });
+  </script>
+  {{end}}
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -36,11 +46,15 @@
     {{ if eq .Page "Home"}}
       {{ template "Home" . }}
     {{ else if eq .Page "Blog" }}
-      {{ template "Blog" . }}
+      {{ template "Blog" .Articles }}
     {{ else if eq .Page "Talks" }}
       {{ template "Talks" . }}
     {{ else if eq .Page "About" }}
       {{ template "About" . }}
+    {{ else if eq .Page "BlogArticle"}}
+      {{ template "BlogArticle" .Article }}
+    {{ else if eq .Page "Editor" }}
+      {{ template "Editor" .Article }}
     {{end}}
   </div>
   {{ template "Footer" . }}
