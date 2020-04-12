@@ -11,7 +11,13 @@
 
     gtag('config', 'UA-163289496-1');
   </script>
+  {{ if eq .Page "BlogArticle" }}
+  <title>{{ .Article.Title }} | Cyrus Javan</title>
+  {{ else if eq .Page "Blog"}}
+  <title>Blog | Cyrus Javan</title>
+  {{ else }}
   <title>Cyrus Javan | Software Engineer</title>
+  {{ end }}
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="Cyrus Javan is a Software Engineer, Jiu Jitsu Practioner and Aquarium Enthusiast currently residing in Silicon Valley.">

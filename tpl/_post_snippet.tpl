@@ -9,9 +9,6 @@
                 <span>{{ .Snippet }}</span>
             </div>
         </p>
-        <!-- <p>
-            <span> <div class="author-image d-inline-block"><img class="w-100 h-100 border border-dark rounded-circle" src="{{ .AuthorImage }}" alt="author image"></div> <strong>{{ .Author }}</strong></span>
-        </p> -->
     </div>
 </div>
 {{end}}
