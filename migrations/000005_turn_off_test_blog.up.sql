@@ -1,0 +1,1 @@
+UPDATE article SET is_active=false WHERE slug='test-article';

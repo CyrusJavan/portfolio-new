@@ -65,9 +65,16 @@ func Run() {
 		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
 	})
 
+	htmlContentType := "text/html; charset=utf-8"
+	notFoundBytes := []byte("<h1>404 Page not found :(</h1>")
+
 	router.GET("/blog/:slug", func(c *gin.Context) {
 		slug := c.Param("slug")
-		article := getArticleBySlug(slug)
+		article, err := getArticleBySlug(slug)
+		if err != nil {
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			return
+		}
 		tmplData.Article = article
 		tmplData.Page = "BlogArticle"
 		tmplData.Title = article.Title
@@ -80,8 +87,6 @@ func Run() {
 		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
 	})
 
-	htmlContentType := "text/html; charset=utf-8"
-	notFoundBytes := []byte("<h1>404 Page not found :(</h1>")
 	const adminCookie string = "ADMIN_KEY"
 
 	router.GET("/editor/:slug", func(c *gin.Context) {
@@ -96,7 +101,11 @@ func Run() {
 		}
 
 		slug := c.Param("slug")
-		article := getArticleBySlug(slug)
+		article, err := getArticleBySlug(slug)
+		if err != nil {
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			return
+		}
 		tmplData.Article = article
 		tmplData.Page = "Editor"
 		tmplData.Title = "Editor"
@@ -208,18 +217,18 @@ func getArticleTags(articleID int) []string {
 	return tags
 }
 
-func getArticleBySlug(slug string) Article {
+func getArticleBySlug(slug string) (Article, error) {
 	db := db.GetInstance()
 	sql := `
 	SELECT ar.id, ar.slug, au.name, extract(epoch from ar.created_at), au.image_url, ar.title, ar.content, ar.snippet
 	FROM article ar JOIN author au ON au.id=ar.author_id
-	WHERE ar.slug = $1;
+	WHERE ar.slug = $1 AND ar.is_active;
 	`
 	article := Article{}
 	err := db.Get(&article, sql, slug)
 	if err != nil {
 		log.Printf("Failed to getArticleBySlug slug %s: %s", slug, err.Error())
-		return Article{}
+		return Article{}, err
 	}
 
 	ts := article.Timestamp
@@ -227,7 +236,7 @@ func getArticleBySlug(slug string) Article {
 	article.Date = time.Unix(secs, 0).Format("Monday, January 2 2006")
 	article.Tags = getArticleTags(article.ID)
 
-	return article
+	return article, nil
 }
 
 func updateArticleContent(slug, content, snippet, title string) error {
