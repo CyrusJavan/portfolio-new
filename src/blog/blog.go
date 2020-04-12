@@ -80,10 +80,56 @@ func Run() {
 		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
 	})
 
+	htmlContentType := "text/html; charset=utf-8"
+	notFoundBytes := []byte("<h1>404 Page not found :(</h1>")
+	const adminCookie string = "ADMIN_KEY"
+
+	router.GET("/editor/:slug", func(c *gin.Context) {
+		key, err := c.Cookie(adminCookie)
+		if err != nil {
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			return
+		}
+		if key != os.Getenv("ADMIN_KEY") {
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			return
+		}
+
+		slug := c.Param("slug")
+		article := getArticleBySlug(slug)
+		tmplData.Article = article
+		tmplData.Page = "Editor"
+		tmplData.Title = "Editor"
+		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
+	})
+
+	router.POST("/editor/:slug", func(c *gin.Context) {
+		key, err := c.Cookie(adminCookie)
+		if err != nil {
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			return
+		}
+		if key != os.Getenv("ADMIN_KEY") {
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			return
+		}
+
+		slug := c.Param("slug")
+		content := c.PostForm("content")
+		snippet := c.PostForm("snippet")
+		title := c.PostForm("title")
+		err = updateArticleContent(slug, content, snippet, title)
+		if err != nil {
+			log.Printf("Failed to edit article %s : %v", slug, err)
+			c.String(http.StatusBadRequest, "")
+		}
+		c.String(http.StatusOK, "OK")
+	})
+
 	router.POST("/api/track", handleAPITrack)
 
 	router.NoRoute(func(c *gin.Context) {
-		c.Data(http.StatusNotFound, "text/html; charset=utf-8", []byte("<h1>404 Page not found :(</h1>"))
+		c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
 	})
 
 	router.Run(":" + port)
@@ -173,6 +219,7 @@ func getArticleBySlug(slug string) Article {
 	err := db.Get(&article, sql, slug)
 	if err != nil {
 		log.Printf("Failed to getArticleBySlug slug %s: %s", slug, err.Error())
+		return Article{}
 	}
 
 	ts := article.Timestamp
@@ -181,4 +228,20 @@ func getArticleBySlug(slug string) Article {
 	article.Tags = getArticleTags(article.ID)
 
 	return article
+}
+
+func updateArticleContent(slug, content, snippet, title string) error {
+	db := db.GetInstance()
+	sql := `
+	UPDATE article
+	SET content = :content, snippet = :snippet, title = :title
+	WHERE slug = :slug
+	`
+	_, err := db.NamedExec(sql, map[string]interface{}{
+		"content": content,
+		"snippet": snippet,
+		"slug":    slug,
+		"title":   title,
+	})
+	return err
 }
