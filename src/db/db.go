@@ -5,13 +5,11 @@ import (
 	"os"
 
 	"github.com/jmoiron/sqlx"
-	// Postgres
-	_ "github.com/lib/pq"
 )
 
 var conn *sqlx.DB
 
-// GetInstance of the db
+// GetInstance returns a connection to the database.
 func GetInstance() *sqlx.DB {
 	// Use an existing connection if you can
 	if conn != nil {

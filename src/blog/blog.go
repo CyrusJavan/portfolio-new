@@ -7,250 +7,149 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/CyrusJavan/portfolio-new/src/db"
-
 	"github.com/joho/godotenv"
 
 	"github.com/gin-gonic/gin"
 )
 
-// Run the server
+const (
+	index           = "index.tpl"
+	htmlContentType = "text/html; charset=utf-8"
+	adminCookie     = "ADMIN_KEY"
+)
+
+var (
+	notFoundBytes = []byte("<h1>404 Page not found :(</h1>")
+)
+
+type templateData struct {
+	Year     int
+	Page     string
+	Title    string
+	Articles []Article
+	Article  Article
+}
+
+// Run defines the routes and starts the server.
 func Run() {
-	// load values from .env into the system
 	if err := godotenv.Load(); err != nil {
-		log.Print("No .env file found")
+		log.Printf("No .env file found: %w", err)
 	}
 
-	// Heroku supplies the PORT env variable in production
-	port := ""
-	if os.Getenv("PORT") == "" {
-		port = "7070"
-	} else {
-		port = os.Getenv("PORT")
-	}
+	r := gin.Default()
+	r.Static("/static", "static")
 
-	if port == "" {
-		log.Fatal("$PORT must be set")
-	}
+	t := template.Must(template.ParseGlob("tpl/*.tpl"))
+	td := templateData{time.Now().UTC().Year(), "", "", nil, Article{}}
 
-	router := gin.Default()
-	router.Static("/static", "static")
-	tmpl := template.Must(template.ParseGlob("tpl/*.tpl"))
+	r.GET("/", getRootHandler(t, td))
+	r.GET("/about", getAboutHandler(t, td))
+	r.GET("/blog", getBlogHandler(t, td))
+	r.GET("/blog/:slug", getBlogSlugHandler(t, td))
+	r.GET("/talks", getTalksHandler(t, td))
+	r.GET("/editor/:slug", getEditSlugHandler(t, td))
+	r.POST("/editor/:slug", getEditSlugPostHandler(t, td))
+	r.POST("/api/track", handleAPITrack)
 
-	tmplData := struct {
-		Year     int
-		Page     string
-		Title    string
-		Articles []Article
-		Article  Article
-	}{time.Now().UTC().Year(), "", "", nil, Article{}}
-
-	router.GET("/", func(c *gin.Context) {
-		tmplData.Page = "Home"
-		tmplData.Title = "Software Engineer"
-		tmplData.Articles = getAllArticles()
-		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
-	})
-
-	router.GET("/about", func(c *gin.Context) {
-		tmplData.Page = "About"
-		tmplData.Title = "About"
-		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
-	})
-
-	router.GET("/blog", func(c *gin.Context) {
-		tmplData.Page = "Blog"
-		tmplData.Title = "Blog"
-		tmplData.Articles = getAllArticles()
-		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
-	})
-
-	htmlContentType := "text/html; charset=utf-8"
-	notFoundBytes := []byte("<h1>404 Page not found :(</h1>")
-
-	router.GET("/blog/:slug", func(c *gin.Context) {
-		slug := c.Param("slug")
-		article, err := getArticleBySlug(slug)
-		if err != nil {
-			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
-			return
-		}
-		tmplData.Article = article
-		tmplData.Page = "BlogArticle"
-		tmplData.Title = article.Title
-		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
-	})
-
-	router.GET("/talks", func(c *gin.Context) {
-		tmplData.Page = "Talks"
-		tmplData.Title = "Talks"
-		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
-	})
-
-	const adminCookie string = "ADMIN_KEY"
-
-	router.GET("/editor/:slug", func(c *gin.Context) {
-		key, err := c.Cookie(adminCookie)
-		if err != nil {
-			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
-			return
-		}
-		if key != os.Getenv("ADMIN_KEY") {
-			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
-			return
-		}
-
-		slug := c.Param("slug")
-		article, err := getArticleBySlug(slug)
-		if err != nil {
-			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
-			return
-		}
-		tmplData.Article = article
-		tmplData.Page = "Editor"
-		tmplData.Title = "Editor"
-		tmpl.ExecuteTemplate(c.Writer, "index.tpl", tmplData)
-	})
-
-	router.POST("/editor/:slug", func(c *gin.Context) {
-		key, err := c.Cookie(adminCookie)
-		if err != nil {
-			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
-			return
-		}
-		if key != os.Getenv("ADMIN_KEY") {
-			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
-			return
-		}
-
-		slug := c.Param("slug")
-		content := c.PostForm("content")
-		snippet := c.PostForm("snippet")
-		title := c.PostForm("title")
-		err = updateArticleContent(slug, content, snippet, title)
-		if err != nil {
-			log.Printf("Failed to edit article %s : %v", slug, err)
-			c.String(http.StatusBadRequest, "")
-		}
-		c.String(http.StatusOK, "OK")
-	})
-
-	router.POST("/api/track", handleAPITrack)
-
-	router.NoRoute(func(c *gin.Context) {
+	r.NoRoute(func(c *gin.Context) {
 		c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
 	})
 
-	router.Run(":" + port)
+	p := os.Getenv("PORT")
+	r.Run(":" + p)
 }
 
-// Article information
-type Article struct {
-	ID          int     `db:"id"`
-	Slug        string  `db:"slug"`
-	Author      string  `db:"name"`
-	Timestamp   float64 `db:"date_part"`
-	Date        string
-	AuthorImage string `db:"image_url"`
-	Title       string `db:"title"`
-	Content     string `db:"content"`
-	Snippet     string `db:"snippet"`
-	Tags        []string
-}
-
-func getAllArticles() []Article {
-	db := db.GetInstance()
-	sql := `
-	SELECT ar.id, ar.slug, au.name, extract(epoch from ar.created_at), au.image_url, ar.title, ar.content, ar.snippet
-	FROM article ar JOIN author au ON au.id=ar.author_id
-	WHERE ar.is_active;
-	`
-	rows, err := db.Queryx(sql)
-	if err != nil {
-		log.Printf("Failed to getAllArticles: %s", err.Error())
+func getRootHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		td.Page = "Home"
+		td.Title = "Software Engineer"
+		td.Articles = getAllArticles()
+		t.ExecuteTemplate(c.Writer, index, td)
 	}
-	articles := []Article{}
-	for rows.Next() {
-		article := Article{}
-		err = rows.StructScan(&article)
+}
+
+func getAboutHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		td.Page = "About"
+		td.Title = "About"
+		t.ExecuteTemplate(c.Writer, index, td)
+	}
+}
+
+func getBlogHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		td.Page = "Blog"
+		td.Title = "Blog"
+		td.Articles = getAllArticles()
+		t.ExecuteTemplate(c.Writer, index, td)
+	}
+}
+
+func getBlogSlugHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		s := c.Param("slug")
+		a, err := getArticleBySlug(s)
 		if err != nil {
-			log.Printf("Failed to get scan a row into article struct: %s", err.Error())
-			continue
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			log.Printf("Slug not found: %s", s)
+			return
 		}
-		ts := article.Timestamp
-		secs := int64(ts)
-		article.Date = time.Unix(secs, 0).Format("Monday, January 2 2006")
-		article.Tags = getArticleTags(article.ID)
-		articles = append(articles, article)
+		td.Article = a
+		td.Page = "BlogArticle"
+		td.Title = a.Title
+		t.ExecuteTemplate(c.Writer, index, td)
 	}
-	rows.Close()
-
-	return articles
 }
 
-func getArticleTags(articleID int) []string {
-	db := db.GetInstance()
-	sql := `
-	SELECT tag.name
-	FROM article_tag JOIN tag ON tag.id = article_tag.tag_id
-	WHERE article_tag.article_id = $1
-	`
-	rows, err := db.Queryx(sql, articleID)
-	if err != nil {
-		log.Printf("Failed to getArticleTags for articleID %d: %s", articleID, err.Error())
-		return []string{}
+func getTalksHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		td.Page = "Talks"
+		td.Title = "Talks"
+		t.ExecuteTemplate(c.Writer, index, td)
 	}
-	tags := []string{}
-	for rows.Next() {
-		tag := struct {
-			Name string
-		}{}
-		err = rows.StructScan(&tag)
+}
+
+func getEditSlugHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		k, err := c.Cookie(adminCookie)
+		s := c.Param("slug")
+
+		if err != nil || k != os.Getenv("ADMIN_KEY") {
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			log.Printf("Failed auth GET /edit/%s", s)
+			return
+		}
+
+		a, err := getArticleBySlug(s)
 		if err != nil {
-			log.Printf("Failed to get scan a row into tag struct: %s", err.Error())
-			continue
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			log.Printf("Could not find article by slug to edit: %s", s)
+			return
 		}
-		tags = append(tags, tag.Name)
-	}
-	rows.Close()
 
-	return tags
+		td.Article = a
+		td.Page = "Editor"
+		td.Title = "Editor"
+		t.ExecuteTemplate(c.Writer, index, td)
+	}
 }
 
-func getArticleBySlug(slug string) (Article, error) {
-	db := db.GetInstance()
-	sql := `
-	SELECT ar.id, ar.slug, au.name, extract(epoch from ar.created_at), au.image_url, ar.title, ar.content, ar.snippet
-	FROM article ar JOIN author au ON au.id=ar.author_id
-	WHERE ar.slug = $1 AND ar.is_active;
-	`
-	article := Article{}
-	err := db.Get(&article, sql, slug)
-	if err != nil {
-		log.Printf("Failed to getArticleBySlug slug %s: %s", slug, err.Error())
-		return Article{}, err
+func getEditSlugPostHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		k, err := c.Cookie(adminCookie)
+		s := c.Param("slug")
+		if err != nil || k != os.Getenv("ADMIN_KEY") {
+			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
+			log.Printf("Failed auth POST /edit/%s", s)
+			return
+		}
+
+		err = updateArticleContent(s, c.PostForm("content"), c.PostForm("snippet"), c.PostForm("title"))
+		if err != nil {
+			log.Printf("Failed to edit article %s : %v", s, err)
+			c.String(http.StatusBadRequest, "")
+			return
+		}
+		c.String(http.StatusOK, "OK")
 	}
-
-	ts := article.Timestamp
-	secs := int64(ts)
-	article.Date = time.Unix(secs, 0).Format("Monday, January 2 2006")
-	article.Tags = getArticleTags(article.ID)
-
-	return article, nil
-}
-
-func updateArticleContent(slug, content, snippet, title string) error {
-	db := db.GetInstance()
-	sql := `
-	UPDATE article
-	SET content = :content, snippet = :snippet, title = :title
-	WHERE slug = :slug
-	`
-	_, err := db.NamedExec(sql, map[string]interface{}{
-		"content": content,
-		"snippet": snippet,
-		"slug":    slug,
-		"title":   title,
-	})
-	return err
 }
