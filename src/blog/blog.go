@@ -47,8 +47,12 @@ func Run() {
 	r.GET("/blog", getBlogHandler(t, td))
 	r.GET("/blog/:slug", getBlogSlugHandler(t, td))
 	r.GET("/talks", getTalksHandler(t, td))
-	r.GET("/editor/:slug", getEditSlugHandler(t, td))
-	r.POST("/editor/:slug", getEditSlugPostHandler(t, td))
+
+	authorized := r.Group("/")
+	authorized.Use(getAuthMiddleware())
+	authorized.GET("/edit/:slug", getEditSlugHandler(t, td))
+	authorized.POST("/edit/:slug", getEditSlugPostHandler(t, td))
+
 	r.POST("/api/track", handleAPITrack)
 
 	r.NoRoute(func(c *gin.Context) {
@@ -109,17 +113,21 @@ func getTalksHandler(t *template.Template, td templateData) func(*gin.Context) {
 	}
 }
 
-func getEditSlugHandler(t *template.Template, td templateData) func(*gin.Context) {
+func getAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		k, err := c.Cookie(adminCookie)
-		s := c.Param("slug")
-
 		if err != nil || k != os.Getenv("ADMIN_KEY") {
 			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
-			log.Printf("Failed auth GET /edit/%s", s)
+			c.Abort()
 			return
 		}
+		c.Next()
+	}
+}
 
+func getEditSlugHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		s := c.Param("slug")
 		a, err := getArticleBySlug(s)
 		if err != nil {
 			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
@@ -136,15 +144,8 @@ func getEditSlugHandler(t *template.Template, td templateData) func(*gin.Context
 
 func getEditSlugPostHandler(t *template.Template, td templateData) func(*gin.Context) {
 	return func(c *gin.Context) {
-		k, err := c.Cookie(adminCookie)
 		s := c.Param("slug")
-		if err != nil || k != os.Getenv("ADMIN_KEY") {
-			c.Data(http.StatusNotFound, htmlContentType, notFoundBytes)
-			log.Printf("Failed auth POST /edit/%s", s)
-			return
-		}
-
-		err = updateArticleContent(s, c.PostForm("content"), c.PostForm("snippet"), c.PostForm("title"))
+		err := updateArticleContent(s, c.PostForm("content"), c.PostForm("snippet"), c.PostForm("title"))
 		if err != nil {
 			log.Printf("Failed to edit article %s : %v", s, err)
 			c.String(http.StatusBadRequest, "")
