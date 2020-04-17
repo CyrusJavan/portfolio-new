@@ -1,8 +1,10 @@
 package blog
 
 import (
-	"log"
 	"time"
+
+	"github.com/apex/log"
+	"github.com/gin-gonic/gin"
 
 	"github.com/CyrusJavan/portfolio-new/src/db"
 )
@@ -21,8 +23,8 @@ type Article struct {
 	Tags        []string
 }
 
-func getAllArticles() []Article {
-	db := db.GetInstance()
+func getAllArticles(c *gin.Context) []Article {
+	db := db.GetInstance(c)
 	sql := `
 	SELECT ar.id, ar.slug, au.name, extract(epoch from ar.created_at), au.image_url, ar.title, ar.content, ar.snippet
 	FROM article ar JOIN author au ON au.id=ar.author_id
@@ -30,20 +32,27 @@ func getAllArticles() []Article {
 	`
 	rows, err := db.Queryx(sql)
 	if err != nil {
-		log.Printf("Failed to getAllArticles: %s", err.Error())
+		l := c.Keys["logEntry"].(*log.Entry)
+		l.WithError(err).WithFields(log.Fields{
+			"func":  "getAllArticles",
+			"query": sql,
+		}).Error("query failed")
 	}
 	articles := []Article{}
 	for rows.Next() {
 		article := Article{}
 		err = rows.StructScan(&article)
 		if err != nil {
-			log.Printf("Failed to get scan a row into article struct: %s", err.Error())
+			l := c.Keys["logEntry"].(*log.Entry)
+			l.WithError(err).WithFields(log.Fields{
+				"func": "getAllArticles",
+			}).Error("could not parse article query result")
 			continue
 		}
 		ts := article.Timestamp
 		secs := int64(ts)
 		article.Date = time.Unix(secs, 0).Format("Monday, January 2 2006")
-		article.Tags = getArticleTags(article.ID)
+		article.Tags = getArticleTags(c, article.ID)
 		articles = append(articles, article)
 	}
 	rows.Close()
@@ -51,8 +60,8 @@ func getAllArticles() []Article {
 	return articles
 }
 
-func getArticleTags(articleID int) []string {
-	db := db.GetInstance()
+func getArticleTags(c *gin.Context, articleID int) []string {
+	db := db.GetInstance(c)
 	sql := `
 	SELECT tag.name
 	FROM article_tag JOIN tag ON tag.id = article_tag.tag_id
@@ -60,7 +69,11 @@ func getArticleTags(articleID int) []string {
 	`
 	rows, err := db.Queryx(sql, articleID)
 	if err != nil {
-		log.Printf("Failed to getArticleTags for articleID %d: %s", articleID, err.Error())
+		l := c.Keys["logEntry"].(*log.Entry)
+		l.WithError(err).WithFields(log.Fields{
+			"func":      "getArticleTags",
+			"articleID": articleID,
+		}).Error("article not found")
 		return []string{}
 	}
 	tags := []string{}
@@ -70,7 +83,11 @@ func getArticleTags(articleID int) []string {
 		}{}
 		err = rows.StructScan(&tag)
 		if err != nil {
-			log.Printf("Failed to get scan a row into tag struct: %s", err.Error())
+			l := c.Keys["logEntry"].(*log.Entry)
+			l.WithError(err).WithFields(log.Fields{
+				"func":      "getArticleTags",
+				"articleID": articleID,
+			}).Error("could not parse article_tags query result")
 			continue
 		}
 		tags = append(tags, tag.Name)
@@ -80,8 +97,8 @@ func getArticleTags(articleID int) []string {
 	return tags
 }
 
-func getArticleBySlug(slug string) (Article, error) {
-	db := db.GetInstance()
+func getArticleBySlug(c *gin.Context, slug string) (Article, error) {
+	db := db.GetInstance(c)
 	sql := `
 	SELECT ar.id, ar.slug, au.name, extract(epoch from ar.created_at), au.image_url, ar.title, ar.content, ar.snippet
 	FROM article ar JOIN author au ON au.id=ar.author_id
@@ -90,20 +107,24 @@ func getArticleBySlug(slug string) (Article, error) {
 	article := Article{}
 	err := db.Get(&article, sql, slug)
 	if err != nil {
-		log.Printf("Failed to getArticleBySlug slug %s: %s", slug, err.Error())
+		l := c.Keys["logEntry"].(*log.Entry)
+		l.WithError(err).WithFields(log.Fields{
+			"func": "getArticleBySlug",
+			"slug": slug,
+		}).Error("article not found")
 		return Article{}, err
 	}
 
 	ts := article.Timestamp
 	secs := int64(ts)
 	article.Date = time.Unix(secs, 0).Format("Monday, January 2 2006")
-	article.Tags = getArticleTags(article.ID)
+	article.Tags = getArticleTags(c, article.ID)
 
 	return article, nil
 }
 
-func updateArticleContent(slug, content, snippet, title string) error {
-	db := db.GetInstance()
+func updateArticleContent(c *gin.Context, slug, content, snippet, title string) error {
+	db := db.GetInstance(c)
 	sql := `
 	UPDATE article
 	SET content = :content, snippet = :snippet, title = :title

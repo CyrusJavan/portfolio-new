@@ -1,8 +1,9 @@
 package blog
 
 import (
-	"log"
 	"net/http"
+
+	"github.com/apex/log"
 
 	"github.com/CyrusJavan/portfolio-new/src/db"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ type trackResponse struct {
 }
 
 func handleAPITrack(c *gin.Context) {
-	db := db.GetInstance()
+	db := db.GetInstance(c)
 
 	viewType := c.PostForm("type")
 	page := c.PostForm("page")
@@ -30,7 +31,10 @@ func handleAPITrack(c *gin.Context) {
 		})
 
 	if err != nil {
-		log.Print(err)
+		l := c.Keys["logEntry"].(*log.Entry)
+		l.WithError(err).WithFields(log.Fields{
+			"func": "handleAPITrack",
+		}).Error("insert failed")
 		c.JSON(http.StatusInternalServerError, trackResponse{"fail", err.Error()})
 		return
 	}
