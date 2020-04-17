@@ -29,3 +29,19 @@ func GetInstance(c *gin.Context) *sqlx.DB {
 	conn = db
 	return db
 }
+
+// GetInstanceNoContext returns a connection to the database without using a
+// gin.Context for logging.
+func GetInstanceNoContext() *sqlx.DB {
+	if conn != nil {
+		return conn
+	}
+
+	db, err := sqlx.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.WithError(err).Error("could not open DB connection")
+	}
+
+	conn = db
+	return db
+}

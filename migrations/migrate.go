@@ -17,7 +17,7 @@ func main() {
 		log.Print("No .env file found")
 	}
 
-	db := db.GetInstance()
+	db := db.GetInstanceNoContext()
 	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
 	if err != nil {
 		log.Fatal(err)
