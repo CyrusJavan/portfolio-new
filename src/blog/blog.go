@@ -56,6 +56,7 @@ func Run() {
 	r.GET("/blog", blogHandler(t, td))
 	r.GET("/blog/:slug", blogSlugHandler(t, td))
 	r.GET("/talks", talksHandler(t, td))
+	r.GET("/terraform-schema-tool", terraformSchemaToolHandler(t, td))
 	authorized.GET("/edit/:slug", editSlugHandler(t, td))
 	authorized.POST("/edit/:slug", editSlugPostHandler(t, td))
 
@@ -252,5 +253,21 @@ func editSlugPostHandler(t *template.Template, td templateData) func(*gin.Contex
 			return
 		}
 		c.String(http.StatusOK, "OK")
+	}
+}
+
+func terraformSchemaToolHandler(t *template.Template, td templateData) func(*gin.Context) {
+	return func(c *gin.Context) {
+		td.Page = "TerraformSchema"
+		td.Title = "Terraform Schema Tool"
+		err := t.ExecuteTemplate(c.Writer, index, td)
+		if err != nil {
+			l := c.Keys["logEntry"].(*log.Entry)
+			l.WithError(err).WithFields(log.Fields{
+				"func":         "talksHandler",
+				"template":     index,
+				"templateData": td,
+			}).Error("template failed to execute")
+		}
 	}
 }
