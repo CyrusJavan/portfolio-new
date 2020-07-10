@@ -13,10 +13,11 @@
     <div class="row justify-content-center mt-3 mb-5 pl-2">
         <div class="col">
             <p class="h5">
-                &nbsp;&nbsp;&nbsp;&nbsp;My name is Cyrus Javan I'm a Software Engineer currently working in the Silicon Valley. I'm interested
-                web development, scalable infrastructure, and distributed systems. Presently I work as a Full-Stack
-                engineer at BetterHelp. My favorite languages are Go, Python and Spanish. In my free time I practice
-                Brazilian Jiu Jitsu at Heroes Martial Arts in San Jose, CA. I also enjoy reading about ecological systems
+                &nbsp;&nbsp;&nbsp;&nbsp;My name is Cyrus Javan, I'm a Software Engineer currently working in the Silicon Valley. I'm interested
+                web development, scalable infrastructure, and distributed systems. I work at <a href="https://www.aviatrix.com">Aviatrix</a> building our Terraform provider.
+                Terraform is an awesome tool for defining your infrastructure as code.
+                My favorite languages are Go, Python and Spanish.
+                In my free time I practice Brazilian Jiu Jitsu at Heroes Martial Arts in San Jose, CA. I also enjoy reading about ecological systems
                 specifically in the context of sustainable agriculture, as well as maintaining resilient aquatic systems
                 in the home aquarium.
             </p>
