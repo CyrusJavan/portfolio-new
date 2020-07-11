@@ -49,3 +49,12 @@ a:hover {
 	height: 3rem;
 	width: 3rem;
 }
+
+code {
+	font-family: 'Ubuntu Mono', monospace;
+	font-size: large;
+}
+
+pre#tf-code-pre {
+	margin: 0;
+}

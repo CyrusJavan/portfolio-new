@@ -3,7 +3,8 @@
     <div class="row justify-content-start mt-3 pl-2">
       <div class="col-8-md">
         <h2>Terraform Schema Tool</h2>
-        <p>Easily create <a href="https://www.terraform.io/docs/extend/schemas/index.html" target="_blank">schema</a> definitions for your Terraform provider.</p>
+        <p>Easily create <a href="https://www.terraform.io/docs/extend/schemas/index.html" target="_blank">schema</a>
+          definitions for your Terraform provider.</p>
       </div>
     </div>
 
@@ -43,7 +44,8 @@
                 <option>true</option>
                 <option>false</option>
               </select>
-              <input type="number" class="form-control-sm default-input" id="default-value-number" style="display: none;">
+              <input type="number" class="form-control-sm default-input" id="default-value-number"
+                     style="display: none;">
               <input type="text" class="form-control-sm default-input" id="default-value-string" style="display: none;">
             </div>
 
@@ -75,11 +77,8 @@
     </div>
 
     <div class="row justify-content-center mt-4">
-      <div class="col-8-md border border-dark rounded">
-        <pre class="p-1"><code id="tf-code">
-Schema: map[string]*schema.Schema{
-},
-        </code></pre>
+      <div class="col-8-md">
+        <pre id="tf-code-pre" class="line-numbers"><code class="language-go" id="tf-code"></code></pre>
       </div>
     </div>
   </div>

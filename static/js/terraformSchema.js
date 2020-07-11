@@ -121,27 +121,33 @@ function renderAttrDisplay() {
     }
 }
 
-const codeTemplate = Handlebars.compile(`
-Schema: map[string]*schema.Schema{
-    {{#each attributes}}
-    "{{{this.name}}}": {
-        Type: schema.Type{{{this.type}}},
-        {{{this.constraint}}}: true,
-    {{#if this.defaultVal}}
-        Default: {{#if this.defaultIsString}}"{{{this.defaultVal}}}"{{else}}{{{this.defaultVal}}}{{/if}},
-    {{/if}}    
-    {{#if this.forceNew}}
-        ForceNew: true,
-    {{/if}}
-    },
-    {{/each}}
-},
-`);
+const codeTemplate = Handlebars.compile(
+`func resource() *schema.Resource {
+	return &schema.Resource{
+        Schema: map[string]*schema.Schema{
+            {{#each attributes}}
+            "{{{this.name}}}": {
+                Type: schema.Type{{{this.type}}},
+                {{{this.constraint}}}: true,
+            {{#if this.defaultVal}}
+                Default: {{#if this.defaultIsString}}"{{{this.defaultVal}}}"{{else}}{{{this.defaultVal}}}{{/if}},
+            {{/if}}    
+            {{#if this.forceNew}}
+                ForceNew: true,
+            {{/if}}
+            },
+            {{/each}}
+        },
+    }
+}`
+);
 
 // renderCodeBox renders the schema code template.
 function renderCodeBox() {
     let newCode = codeTemplate({attributes: attributes});
+    newCode = gofmt(newCode);
     $("#tf-code").text(newCode);
+    window.Prism.highlightAll()
 }
 
 // alertError is a utility function to show an alert message to the user.
