@@ -4,7 +4,11 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 <script src="/static/js/home.js"></script>
 
-{{ if eq .Page "TerraformSchema" }}
-  <script src="/static/js/terraformSchema.js"></script>
-{{end}}
+  {{ if eq .Page "TerraformSchema" }}
+    <script src="/static/js/terraformSchema/terraformSchema.js"></script>
+    <script src="/static/js/vendor/prism.js"></script>
+    <script src="/static/js/vendor/gofmt.js"></script>
+    <script src="/static/js/terraformSchema/node.js"></script>
+    <script src="/static/js/terraformSchema/utils.js"></script>
+  {{end}}
 {{end}}

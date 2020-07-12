@@ -1,71 +1,78 @@
 body {
-	min-height:100vh;
-	background-color:#fff;
+    min-height: 100vh;
+    background-color: #fff;
 }
 
 .footer {
-	width: 100%;
-	height: 180px;
-	line-height: 60px;
-	background-color: #f5f5f5;
+    width: 100%;
+    height: 180px;
+    line-height: 60px;
+    background-color: #f5f5f5;
 }
 
 .ws-preline {
-	white-space: pre-line;
+    white-space: pre-line;
 }
 
 h1, h2, h3, h3 a, h3 a:hover, h4 {
-	color: #36393a;
+    color: #36393a;
 }
 
 @media only screen and (max-width: 768px) {
-	.container .row .headshot {
-		width: 50%;
-		border-radius: 20%;
-	}
+    .container .row .headshot {
+        width: 50%;
+        border-radius: 20%;
+    }
 }
+
 @media only screen and (min-width: 769px) {
-	.container .row .headshot {
-		width: 20%;
-		border-radius: 20%;
-	}
+    .container .row .headshot {
+        width: 20%;
+        border-radius: 20%;
+    }
 }
 
 a {
-	color: #578797;
+    color: #578797;
 }
 
 a:hover {
-	color: #30525e;
-	text-decoration: none;
+    color: #30525e;
+    text-decoration: none;
 }
 
 .social-icon {
-	font-size: 28px;
-	color: #36393a;
+    font-size: 28px;
+    color: #36393a;
 }
 
 .author-image {
-	height: 3rem;
-	width: 3rem;
+    height: 3rem;
+    width: 3rem;
 }
 
 code {
-	font-family: 'Ubuntu Mono', monospace;
-	font-size: large;
+    font-family: 'Ubuntu Mono', monospace;
+    font-size: large;
 }
 
 pre#tf-code-pre {
-	margin: 0;
+    margin: 0;
 }
 
 .tf-top-row-col {
-	max-height: 24em;
-	height: 24em;
-	overflow: scroll;
-	-webkit-overflow-scrolling: touch;
+    max-height: 24em;
+    height: 24em;
+    overflow: scroll;
+    -webkit-overflow-scrolling: touch;
 }
 
 .col-count-2 {
-	column-count: 2;
+    column-count: 2;
+}
+
+@media only screen and (min-width: 768px) {
+    #mobile-alert {
+        display: none;
+    }
 }

@@ -35,8 +35,6 @@
   <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
   <link href="/static/css/prism.css" rel="stylesheet" />
-  <script src="/static/js/prism.js"></script>
-  <script src="/static/js/gofmt.js"></script>
   {{end}}
 
 

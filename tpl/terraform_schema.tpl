@@ -2,6 +2,9 @@
   <div class="container">
     <div class="row justify-content-start mt-3 pl-2">
       <div class="col-8-md">
+        <div class="alert alert-danger alert-dismissible fade show" id="mobile-alert" role="alert">
+          Sorry! This page is currently not optimized for small screens &#x1F615; For a better experience please use a larger screen.
+        </div>
         <h2>Terraform Schema Tool</h2>
         <p>Easily create <a href="https://www.terraform.io/docs/extend/schemas/index.html" target="_blank">schema</a>
           definitions for your Terraform provider.</p>
@@ -25,6 +28,22 @@
             <div class="form-group">
               <label for="type">Type</label>
               <select class="form-control-sm" id="type">
+                <option disabled>Primitive Types</option>
+                <option>Bool</option>
+                <option>Int</option>
+                <option>Float</option>
+                <option>String</option>
+                <option disabled>Aggregate Types</option>
+                <option>Map</option>
+                <option>List</option>
+                <option>Set</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="elem-type-form-group" style="display: none;">
+              <label for="elem-type">&nbsp;&nbsp;&nbsp;&nbsp;Elem Type</label>
+              <select class="form-control-sm" id="elem-type">
+                <option disabled>Primitive Types</option>
                 <option>Bool</option>
                 <option>Int</option>
                 <option>Float</option>
@@ -78,7 +97,7 @@
     </div>
 
       {{/* Code display row */}}
-    <div class="row justify-content-center mt-4">
+    <div class="row justify-content-center my-4">
       <div class="col">
         <pre id="tf-code-pre" class="line-numbers"><code class="language-go" id="tf-code"></code></pre>
       </div>
