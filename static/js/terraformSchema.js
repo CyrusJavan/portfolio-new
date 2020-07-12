@@ -82,14 +82,21 @@ function refreshTF() {
 
 const attrTemplate = Handlebars.compile(`
 <li id="listgroup-{{{name}}}" class="list-group-item">
-    <p>Name: <span class="text-primary">{{{name}}}</span></p>
-    <p>Type: <span class="text-primary">{{{type}}}</span></p>
-    <p>Constraint: <span class="text-primary">{{{constraint}}}</span></p>
-    {{#if defaultVal}}
-    <p>Default: <span class="text-primary">{{{defaultVal}}}</span></p>
-    {{/if}}
-    <p>ForceNew: <span class="text-primary">{{{forceNew}}}</span></p>
-    <p><a style="display: none;" href="#" id="trash-{{{name}}}"><i class="fa fa-trash" aria-hidden="true"></i></a></p>
+    <div class="d-flex">
+      <div class="col-count-2">
+            <p>Name: <span class="text-primary">{{{name}}}</span></p>
+            <p>Type: <span class="text-primary">{{{type}}}</span></p>
+            <p>Constraint: <span class="text-primary">{{{constraint}}}</span></p>
+            {{#if defaultVal}}
+            <p>Default: <span class="text-primary">{{{defaultVal}}}</span></p>
+            {{/if}}
+            <p>ForceNew: <span class="text-primary">{{{forceNew}}}</span></p>
+        </div>
+        <div class="ml-auto">
+          <p><a href="#" id="trash-{{{name}}}"><i class="fa fa-trash" aria-hidden="true"></i></a></p>
+          <p><a href="#" id="edit-{{{name}}}"><i class="fa fa-edit" aria-hidden="true"></i></a></p>
+        </div>
+    </div>
 </li>
 `);
 
@@ -103,26 +110,25 @@ function renderAttrDisplay() {
         let el = attrTemplate(a);
         ab.append(el);
 
-        $(`#listgroup-${a.name}`).hover(
-            function () {
-                $(`#trash-${a.name}`).show();
-            },
-            function () {
-                $(`#trash-${a.name}`).hide();
-            }
-        );
-
         $(`#trash-${a.name}`).click(function () {
             attributes = attributes.filter(function (ele) {
                 return ele.name !== a.name;
             });
             refreshTF();
         });
+
+        $(`#edit-${a.name}`).click(function () {
+            console.log("Edit");
+        });
     }
 }
 
+Handlebars.registerHelper('empty', function (l) {
+    return l.length === 0
+})
+
 const codeTemplate = Handlebars.compile(
-`func resource() *schema.Resource {
+    `func resource() *schema.Resource {
 	return &schema.Resource{
         Schema: map[string]*schema.Schema{
             {{#each attributes}}
@@ -137,6 +143,9 @@ const codeTemplate = Handlebars.compile(
             {{/if}}
             },
             {{/each}}
+            {{#if (empty attributes) }}
+            // Happy Terraforming :)
+            {{/if}}
         },
     }
 }`

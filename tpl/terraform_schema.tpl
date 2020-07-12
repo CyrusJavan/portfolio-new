@@ -8,13 +8,14 @@
       </div>
     </div>
 
-    <div class="row justify-content-around mt-4">
-      <div class="col-6-md">
+      {{/* Top Row */}}
+    <div class="row justify-content-between mt-4">
+        {{/* Input New Attribute */}}
+      <div class="col tf-top-row-col">
         <div class="mr-5">
           <form>
-            <div id="alerts">
+            <div id="alerts"></div>
 
-            </div>
             <div class="form-group">
               <label for="name">Name</label>
               <input type="text" class="form-control-sm" id="name" aria-describedby="name"
@@ -65,19 +66,20 @@
               </label>
             </div>
 
-            <button type="button" id="new-attribute-btn" class="btn btn-primary">Add New</button>
+            <button type="button" id="new-attribute-btn" class="btn btn-primary">Add Attribute</button>
           </form>
         </div>
       </div>
-
-      <div class="col-6-md">
+        {{/* Display current attributes */}}
+      <div class="col tf-top-row-col">
         <ul id="attribute-box" class="list-group">
         </ul>
       </div>
     </div>
 
+      {{/* Code display row */}}
     <div class="row justify-content-center mt-4">
-      <div class="col-8-md">
+      <div class="col">
         <pre id="tf-code-pre" class="line-numbers"><code class="language-go" id="tf-code"></code></pre>
       </div>
     </div>

@@ -58,3 +58,14 @@ code {
 pre#tf-code-pre {
 	margin: 0;
 }
+
+.tf-top-row-col {
+	max-height: 24em;
+	height: 24em;
+	overflow: scroll;
+	-webkit-overflow-scrolling: touch;
+}
+
+.col-count-2 {
+	column-count: 2;
+}
